@@ -1,0 +1,8 @@
+# Show five year averages for pitching
+analyze_five_year_records(pitching_five_year, ['ERA', 'Wins' ,'Strikeouts'])
+
+# Analyze records for previous two pitching seasons
+analyze_previous_records(pitching_previous, ['ERA', 'Wins', 'Strikeouts'])
+
+# Analyze following two seasons of pitching
+analyze_following_records(pitching_following, ['ERA', 'Wins', 'Strikeouts'])

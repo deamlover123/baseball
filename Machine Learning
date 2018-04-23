@@ -1,0 +1,60 @@
+# testing_set is my new DataFrame that will eventually include the features and labels for machine learning
+testing_set = all_batting[['yearID', 'playerID', 'RBI', 'H', 'HR', 'G']]
+testing_set = testing_set[(testing_set['yearID'] == 2006) | (testing_set['yearID'] == 2007)]
+testing_set = testing_set.merge(salaries_2008, on='playerID')
+testing_set = testing_set[testing_set['G'] >= 100]
+testing_set = testing_set.groupby(['playerID', 'yearID'], as_index=False).mean()
+years_to_examine = [2006, 2007]
+# This is a repeat of the function used to find players with records in all five years used in the analysis section.
+def find_players_with_all_years(records):
+    
+    # First create a list with all of the playerIDs (many will be repeated) in the playerID column of the DataFrame
+    list_of_IDs = list(records['playerID'])
+    players_with_five_years = set()
+    
+    # Iterate through the list of IDs and count how many times a given ID occurs in the list
+    # This will correspond to the number of entries that player has in the records_df
+    for player in list_of_IDs:
+        if (list_of_IDs.count(player)) == len(years_to_examine):
+            players_with_five_years.add(player)
+    
+    # Return a modified DataFrame that only includes players with records in every year to be examined.
+    return records[records['playerID'].isin(players_with_five_years)]
+testing_set = find_players_with_all_years(testing_set)
+# Average the player statistics across the two years
+testing_set = testing_set.groupby('playerID', as_index=False).mean()
+testing_set.head()
+
+testing_set['salary_sd'] = (testing_set['salary'] - testing_set['salary'].mean()) / testing_set['salary'].std()
+testing_set['labels'] = testing_set['salary_sd'] > 0
+testing_set['labels'] = testing_set['labels'].astype(int)
+testing_set.drop(['yearID', 'playerID', 'G', 'salary'], axis=1, inplace=True)
+testing_set.head(8)
+
+#sci-kit learn imports
+from sklearn.preprocessing import scale
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import GaussianNB
+testing_set.drop('salary_sd', axis=1, inplace=True)
+# Customary to name the features X and the labels y
+X = np.array(testing_set.drop('labels', axis=1))
+y = np.array(testing_set['labels'])
+# Preprocessing
+X = scale(X)
+# Split the data into a training set and a testing set
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
+# Create the classifier and train on the training set
+gnb = GaussianNB()
+gnb.fit(X_train, y_train);
+# Test the classifier on the testing set of data
+accuracy = gnb.score(X_test, y_test)
+print("Accuracy: {:.2f}".format(accuracy*100))
+
+num_training_runs = 100
+accuracy = []
+for i in range(num_training_runs):
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
+    gnb.fit(X_train, y_train)
+    accuracy.append(gnb.score(X_test, y_test))
+    
+print('The average accuracy over {} training runs was {:0.2f}%.'.format(num_training_runs, 100*np.mean(accuracy)))

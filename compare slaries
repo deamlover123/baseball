@@ -1,0 +1,7 @@
+# I am only concerned with salaries in the year 2008. I don't need to know the teams or the league of the player.
+salaries_2008 = all_salaries[all_salaries['yearID']==2008]
+salaries_2008 = salaries_2008.drop(['yearID', 'teamID', 'lgID'], axis=1)
+# Create a histogram salaries from 2008.
+plt.hist((salaries_2008['salary']/1e6), bins=6, color='g', edgecolor='black', linewidth=1.2, align='mid');
+plt.xlabel('Salary (millions of $)'), plt.ylabel('Count')
+plt.title('MLB 2008 Salary Distribution', size = 14);

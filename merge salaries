@@ -1,0 +1,28 @@
+# Merge the salary and performance statistics DataFrames. This will add a column with the salary to the DataFrames. 
+batting = batting.merge(salaries_2008, on='playerID')
+batting = batting.rename(columns = {'H': 'Hits', 'HR': 'Home Runs', 'G': 'Games', 'salary' : 'Salary'})
+pitching = pitching.merge(salaries_2008, on='playerID')
+pitching = pitching.rename(columns = {'W':'Wins', 'SO':'Strikeouts', 'salary': 'Salary'})
+
+previous_years = [2006, 2007]
+following_years = [2009, 2010]
+# This function takes in the DataFrames with records for all five years and creates three separate DataFrames
+def create_seasons_averages(records):
+    
+    # I found that the easiest way to create the DataFrames was to group by playerID and average the statistics over the years
+    five_year_average = records.groupby('playerID', as_index=False).mean()
+    
+    previous_two_years = records[records['yearID'].isin(previous_years)]
+    previous_two_years_average = previous_two_years.groupby('playerID', as_index=False).mean()
+    
+    following_two_years = records[records['yearID'].isin(following_years)]
+    following_two_years_average = following_two_years.groupby('playerID', as_index=False).mean()
+    
+    # The three DataFrames returned are as specified above. 
+    return five_year_average , previous_two_years_average, following_two_years_average
+# Create the average batting and pitching DataFrames
+batting_five_year, batting_previous, batting_following  = create_seasons_averages(batting)
+pitching_five_year, pitching_previous, pitching_following = create_seasons_averages(pitching)
+
+print('There are {} batters in the wrangled batting datasets.'.format(len(batting_previous)))
+print('There are {} pitchers in the wrangled pitching datasets.'.format(len(pitching_previous)))

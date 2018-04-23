@@ -1,0 +1,39 @@
+'''
+This function takes in a DataFrame and a list of statistics and plots the relationship 
+between each statistic and the salary in a scatter plot. It also draws in the best fit line
+for the data using numpy\'s polyfit method. Finally, it prints the Pearson's correlation correlation
+coefficient between each statistic and the salary. The graph formatting and the print output are 
+specific to the five-year records.
+'''
+def analyze_five_year_records(record_df, statistics_list):
+    for statistic in statistics_list:
+        x = record_df[statistic]
+        y = record_df['Salary'] / 1e6 
+        plt.figure()
+        plt.scatter(x,y)
+        plt.title('Five-Year Average {} vs Salary'.format(statistic))
+        plt.ylabel('Salary (millions of $)')
+        plt.xlabel('{}'.format(statistic))
+        z = numpy.polyfit(x, y, 1)
+        p = numpy.poly1d(z)
+        plt.plot(x, p(x), 'r--')
+        print('The correlation between average {} over the five years and salary is {:0.3f}' \
+         .format(statistic, record_df.corr()[statistic]['Salary']))
+analyze_five_year_records(batting_five_year, ['RBI', 'Hits', 'Home Runs'])
+
+# This function does the same job as the five-year analyze function but the output is tailored to the previous seasons. 
+def analyze_previous_records(record_df, statistics_list):
+    for statistic in statistics_list:
+        x = record_df[statistic]
+        y = record_df['Salary'] / 1e6
+        plt.figure()
+        plt.scatter(x,y)
+        plt.title('Previous Two Seasons Average {} vs Salary'.format(statistic))
+        plt.ylabel('Salary (millions of $)')
+        plt.xlabel('{}'.format(statistic))
+        z = numpy.polyfit(x, y, 1)
+        p = numpy.poly1d(z)
+        plt.plot(x, p(x), 'r--')
+        print('The correlation between average {} over the previous two years and salary is {:0.3f}' \
+         .format(statistic, record_df.corr()['Salary'][statistic]))
+analyze_previous_records(batting_previous, ['RBI', 'Hits', 'Home Runs'])

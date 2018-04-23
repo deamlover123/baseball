@@ -1,0 +1,44 @@
+# Modify the all_batting DataFrame to contain only the statistics I want to examine:
+# For batting these are: Runs Batted In (RBI), Hits (H), Home Runs (HR)
+# Moreover, I only want to examine the 5 year period around the salary year [2006-2010]
+years_to_examine = [2006, 2007, 2008, 2009, 2010]
+batting = all_batting[['playerID', 'yearID', 'RBI', 'H', 'HR', 'G']]
+batting = batting[batting['yearID'].isin(years_to_examine)]
+
+# For pitching, the relevant statistics are: Earned Run Average (ERA), Wins (W), and Stikeouts (SO)
+pitching = all_pitching[['playerID', 'yearID', 'ERA', 'W', 'SO', 'IPouts']]
+pitching = pitching[pitching['yearID'].isin(years_to_examine)]
+
+# Examine the data so far.
+batting.tail(15)
+batting = batting.groupby(['playerID', 'yearID'], as_index=False).sum()
+pitching = pitching.groupby(['playerID', 'yearID'], as_index=False).sum()
+
+# Removing any records with fewer than 100 games for batters and 120 innings pitched for pitchers.
+batting = batting[batting['G'] > 100]
+pitching = pitching[(pitching['IPouts'] / 3) > 120]
+
+'''
+The batting and pitching DataFrames currently contain all players with even a single year in the five-year range.
+I need to remove the players who do not have records across all five seasons. In order to do so, I wrote a function that 
+takes in a DataFrame, and returns the DataFrame modified to only contain players with five entries. At this point, there
+are no players who have multiple entries for the same year, so checking the number of times a given playerID occurs in the 
+playerID column is the quickest way to create the DataFrame I want. 
+'''
+def find_players_with_all_years(records):
+    
+    # First create a list with all of the playerIDs (many will be repeated) in the playerID column of the DataFrame
+    list_of_IDs = list(records['playerID'])
+    players_with_five_years = set()
+    
+    # Iterate through the list of IDs and count how many times a given ID occurs in the list
+    # This will correspond to the number of entries that player has in the records_df
+    for player in list_of_IDs:
+        if (list_of_IDs.count(player)) == len(years_to_examine):
+            players_with_five_years.add(player)
+    
+    # Return a modified DataFrame that only includes players with records in every year in the range of years to examine
+    return records[records['playerID'].isin(players_with_five_years)]
+# Create the new DataFrames including only players with records in years in the analysis
+batting = find_players_with_all_years(batting)
+pitching = find_players_with_all_years(pitching)

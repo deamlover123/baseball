@@ -1,0 +1,16 @@
+# Same analysis and plotting function but tailored to the following seasons. 
+def analyze_following_records(record_df, statistics_list):
+    for statistic in statistics_list:
+        x = record_df[statistic]
+        y = record_df['Salary'] / 1e6
+        plt.figure()
+        plt.scatter(x,y)
+        plt.title('Following Two Seasons Average {} vs Salary'.format(statistic))
+        plt.ylabel('Salary (millions of $)')
+        plt.xlabel('{}'.format(statistic))
+        z = numpy.polyfit(x, y, 1)
+        p = numpy.poly1d(z)
+        plt.plot(x, p(x), 'r--')
+        print('The correlation between average {} over the following two years and salary is {:0.3f}' \
+         .format(statistic, record_df.corr()['Salary'][statistic]))
+analyze_following_records(batting_following, ['RBI', 'Hits', 'Home Runs'])

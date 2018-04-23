@@ -1,0 +1,35 @@
+# Create a new DataFrame comparing the previous seasons averages to the followins seasons averages
+batting_comparison = batting_previous[['playerID', 'Salary']]
+batting_comparison.is_copy =False
+# Create a column showing the change in RBIs from the previous seasons to the following seasons
+batting_comparison['RBI_change'] = batting_following['RBI'] - batting_previous['RBI']
+# Standardize the salaries
+batting_comparison['Salary_SD'] = (batting_comparison['Salary'] - batting_comparison['Salary'].mean()) / batting_comparison['Salary'].std()
+batting_comparison.head()
+
+batting_comparison_above_mean = batting_comparison[batting_comparison['Salary_SD'] > 0]
+batting_comparison_below_mean = batting_comparison[batting_comparison['Salary_SD'] < 0]
+samples_above_average = len(batting_comparison_above_mean)
+samples_below_average = len(batting_comparison_below_mean)
+print('There are {} players with a 2008 salary above the mean.'.format(samples_above_average))
+print('There are {} players with a 2008 salary below the mean.'.format(samples_below_average))
+
+# Plotting the distribution of changes in RBI in the two samples. 
+def bins_labels(bins, **kwargs):
+    bin_w = (max(bins) - min(bins)) / (len(bins) - 1)
+    plt.xticks(np.arange(min(bins)+bin_w/2, max(bins), bin_w), bins, **kwargs)
+    plt.xlim(bins[0], bins[-1])
+bins = range(-60, 40, 10)
+plt.figure()
+plt.hist(batting_comparison_above_mean['RBI_change'], color='g', bins= bins, edgecolor = 'black', linewidth=1.2)
+bins_labels(bins)
+plt.title('Players with Above Average 2008 Salaries')
+plt.xlabel('RBI Change'); plt.ylabel('Count');
+plt.grid(color='k', linewidth=0.2)
+bins = range(-50, 60, 10)
+plt.figure()
+plt.hist(batting_comparison_below_mean['RBI_change'], color = 'r', bins= bins, edgecolor = 'black', linewidth=1.2)
+plt.title('Players with Below Average 2008 Salaries')
+bins_labels(bins)
+plt.xlabel('RBI Change'); plt.ylabel('Count');
+plt.grid(color='k', linewidth=0.2)
